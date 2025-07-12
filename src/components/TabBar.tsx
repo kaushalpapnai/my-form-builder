@@ -42,29 +42,23 @@ export const TabBar: React.FC<TabBarProps> = ({
   onRenameSubmit,
   onKeyDown,
 }) => {
+  const [hoveredGap, setHoveredGap] = React.useState<number | null>(null);
+
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center">
       {/* Scrollable tabs container */}
       <div className="flex-1 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-1 w-max">
+        <div className="flex items-center w-max">
           {tabs.map((tab, index) => (
             <React.Fragment key={tab.id}>
-              {index > 0 && (
-                <button
-                  onClick={() => onAddTab(index)}
-                  className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                >
-                  <Plus size={12} />
-                </button>
-              )}
-              
+              {/* Tab */}
               <div
-                className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer transition-colors ${
+                className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                   tab.id === activeTab
                     ? 'bg-orange-100 text-orange-600 border border-orange-200'
                     : tab.state === 'hover'
-                    ? 'bg-gray-100 text-gray-700'
-                    : 'bg-transparent text-gray-600 hover:bg-gray-50'
+                    ? 'bg-[#9DA4B259] text-gray-700' // Hover state
+                    : 'bg-[#9DA4B226] text-gray-600' // Normal state
                 } ${dragOverIndex === index ? 'border-l-2 border-blue-500' : ''}`}
                 onClick={() => onTabClick(tab.id)}
                 onMouseEnter={() => tab.id !== activeTab && onTabHover(tab.id)}
@@ -99,6 +93,33 @@ export const TabBar: React.FC<TabBarProps> = ({
                   </button>
                 )}
               </div>
+
+              {/* Gap with dashed line - only show if not the last tab */}
+              {index < tabs.length - 1 && (
+                <div
+                  className="flex items-center justify-center relative px-2"
+                  onMouseEnter={() => setHoveredGap(index + 1)}
+                  onMouseLeave={() => setHoveredGap(null)}
+                >
+                  {/* Horizontal dashed line */}
+                  <div className="flex items-center gap-1">
+                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
+                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
+                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
+                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
+                  </div>
+                  
+                  {/* Plus button - only visible on hover */}
+                  <button
+                    onClick={() => onAddTab(index + 1)}
+                    className={`absolute w-5 h-5 flex items-center justify-center text-black shadow-md border border-gray-200 rounded-full transition-all bg-white ${
+                      hoveredGap === index + 1 ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <Plus size={12} />
+                  </button>
+                </div>
+              )}
             </React.Fragment>
           ))}
         </div>
@@ -108,7 +129,7 @@ export const TabBar: React.FC<TabBarProps> = ({
       <div className="flex-shrink-0 ml-2">
         <button
           onClick={() => onAddTab()}
-          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:bg-gray-100 border border-gray-200 shadow-xs rounded-md transition-colors"
         >
           <Plus size={16} />
           <span className="text-sm font-medium">Add page</span>
