@@ -42,6 +42,8 @@ export const TabBar: React.FC<{
   const [hoveredGap, setHoveredGap] = React.useState<number | null>(null);
 
   const isInfoTab = (tab: Tab) => tab.name.toLowerCase() === 'info';
+  const infoTab = tabs.find(tab => isInfoTab(tab));
+  const otherTabs = tabs.filter(tab => !isInfoTab(tab));
 
   const getIcon = (tab: Tab) => {
     const activeClass = tab.id === activeTab ? 'text-orange-500' : 'text-gray-500';
@@ -87,89 +89,119 @@ export const TabBar: React.FC<{
     );
   };
 
+  const renderTab = (tab: Tab, index: number) => (
+    <React.Fragment key={tab.id}>
+      {/* Tab */}
+      <div
+        className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+          tab.id === activeTab
+            ? 'bg-white border border-gray-200 shadow-sm text-gray-800'
+            : tab.state === 'hover'
+            ? 'bg-[#9DA4B259] text-gray-700'
+            : 'bg-[#9DA4B226] text-gray-600'
+        } ${
+          dragOverIndex === index && !isInfoTab(tab)
+            ? 'border-l-2 border-blue-500'
+            : ''
+        }`}
+        onClick={() => onTabClick(tab.id)}
+        onMouseEnter={() => tab.id !== activeTab && onTabHover(tab.id)}
+        onMouseLeave={onTabLeave}
+        draggable={!isInfoTab(tab)}
+        onDragStart={(e) => !isInfoTab(tab) && onDragStart(e, tab.id)}
+        onDragOver={(e) => !isInfoTab(tab) && onDragOver(e, index)}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => !isInfoTab(tab) && onDrop(e, index)}
+      >
+        {/* Icon */}
+        <span>{getIcon(tab)}</span>
+
+        {isRenaming === tab.id ? (
+          <input
+            type="text"
+            value={renameValue}
+            onChange={(e) => onRenameChange(e.target.value)}
+            onBlur={() => onRenameSubmit(tab.id)}
+            onKeyDown={(e) => onKeyDown(e, tab.id)}
+            className="bg-transparent outline-none border-b border-orange-300 text-sm min-w-0 flex-1"
+            autoFocus
+          />
+        ) : (
+          <span className="text-sm font-medium whitespace-nowrap">
+            {tab.name}
+          </span>
+        )}
+
+        {tab.id === activeTab && !isInfoTab(tab) && (
+          <button
+            onClick={(e) => onMenuClick(tab.id, e)}
+            className="p-0.5 hover:bg-gray-200 rounded transition-colors"
+          >
+            <MoreVertical size={12} />
+          </button>
+        )}
+      </div>
+
+      {/* Gap with dotted line and plus button */}
+      {index < otherTabs.length - 1 && !isInfoTab(tab) && (
+        <div
+          className="flex items-center justify-center relative px-2"
+          onMouseEnter={() => setHoveredGap(index + 1)}
+          onMouseLeave={() => setHoveredGap(null)}
+        >
+          <div className="flex items-center gap-[2px]">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="w-[2px] h-[2px] bg-gray-400 rounded-full" />
+            ))}
+          </div>
+
+          <button
+            onClick={() => onAddTab(index + 1)}
+            className={`absolute w-5 h-5 flex items-center justify-center text-black shadow-md border border-gray-200 rounded-full transition-all bg-white ${
+              hoveredGap === index + 1 ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <Plus size={12} />
+          </button>
+        </div>
+      )}
+    </React.Fragment>
+  );
+
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center">
       {/* Scrollable tabs container */}
       <div className="flex-1 overflow-x-auto scrollbar-hide">
         <div className="flex items-center w-max">
-          {tabs.map((tab, index) => (
-            <React.Fragment key={tab.id}>
-              {/* Tab */}
-              <div
-                className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                  tab.id === activeTab
-                    ? 'bg-white border border-gray-200 shadow-sm text-gray-800'
-                    : tab.state === 'hover'
-                    ? 'bg-[#9DA4B259] text-gray-700'
-                    : 'bg-[#9DA4B226] text-gray-600'
-                } ${
-                  dragOverIndex === index && !isInfoTab(tab)
-                    ? 'border-l-2 border-blue-500'
-                    : ''
-                }`}
-                onClick={() => onTabClick(tab.id)}
-                onMouseEnter={() => tab.id !== activeTab && onTabHover(tab.id)}
-                onMouseLeave={onTabLeave}
-                draggable={!isInfoTab(tab)}
-                onDragStart={(e) => !isInfoTab(tab) && onDragStart(e, tab.id)}
-                onDragOver={(e) => !isInfoTab(tab) && onDragOver(e, index)}
-                onDragLeave={onDragLeave}
-                onDrop={(e) => !isInfoTab(tab) && onDrop(e, index)}
-              >
-                {/* Icon */}
-                <span>{getIcon(tab)}</span>
-
-                {isRenaming === tab.id ? (
-                  <input
-                    type="text"
-                    value={renameValue}
-                    onChange={(e) => onRenameChange(e.target.value)}
-                    onBlur={() => onRenameSubmit(tab.id)}
-                    onKeyDown={(e) => onKeyDown(e, tab.id)}
-                    className="bg-transparent outline-none border-b border-orange-300 text-sm min-w-0 flex-1"
-                    autoFocus
-                  />
-                ) : (
-                  <span className="text-sm font-medium whitespace-nowrap">
-                    {tab.name}
-                  </span>
-                )}
-
-                {tab.id === activeTab && !isInfoTab(tab) && (
-                  <button
-                    onClick={(e) => onMenuClick(tab.id, e)}
-                    className="p-0.5 hover:bg-gray-200 rounded transition-colors"
-                  >
-                    <MoreVertical size={12} />
-                  </button>
-                )}
+          {/* Always render Info tab first */}
+          {infoTab && renderTab(infoTab, -1)}
+          
+          {/* Render plus button after Info tab if there are other tabs */}
+          {otherTabs.length > 0 && (
+            <div
+              className="flex items-center justify-center relative px-2"
+              onMouseEnter={() => setHoveredGap(0)}
+              onMouseLeave={() => setHoveredGap(null)}
+            >
+              <div className="flex items-center gap-[2px]">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="w-[2px] h-[2px] bg-gray-400 rounded-full" />
+                ))}
               </div>
 
-              {/* Gap with dotted line and plus button */}
-              {index < tabs.length - 1 && (
-                <div
-                  className="flex items-center justify-center relative px-2"
-                  onMouseEnter={() => setHoveredGap(index + 1)}
-                  onMouseLeave={() => setHoveredGap(null)}
-                >
-                  <div className="flex items-center gap-[2px]">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="w-[2px] h-[2px] bg-gray-400 rounded-full" />
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => onAddTab(index + 1)}
-                    className={`absolute w-5 h-5 flex items-center justify-center text-black shadow-md border border-gray-200 rounded-full transition-all bg-white ${
-                      hoveredGap === index + 1 ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    <Plus size={12} />
-                  </button>
-                </div>
-              )}
-            </React.Fragment>
-          ))}
+              <button
+                onClick={() => onAddTab(0)}
+                className={`absolute w-5 h-5 flex items-center justify-center text-black shadow-md border border-gray-200 rounded-full transition-all bg-white ${
+                  hoveredGap === 0 ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+          )}
+          
+          {/* Render other tabs */}
+          {otherTabs.map((tab, index) => renderTab(tab, index))}
         </div>
       </div>
 
