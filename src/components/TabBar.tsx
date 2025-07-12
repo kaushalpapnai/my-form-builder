@@ -44,6 +44,8 @@ export const TabBar: React.FC<TabBarProps> = ({
 }) => {
   const [hoveredGap, setHoveredGap] = React.useState<number | null>(null);
 
+  const isInfoTab = (tab: Tab) => tab.name.toLowerCase() === 'info';
+
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center">
       {/* Scrollable tabs container */}
@@ -55,21 +57,29 @@ export const TabBar: React.FC<TabBarProps> = ({
               <div
                 className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                   tab.id === activeTab
-                    ? 'bg-orange-100 text-orange-600 border border-orange-200'
+                    ? 'bg-white border border-gray-200 shadow-xs text-gray-800'
                     : tab.state === 'hover'
-                    ? 'bg-[#9DA4B259] text-gray-700' // Hover state
-                    : 'bg-[#9DA4B226] text-gray-600' // Normal state
-                } ${dragOverIndex === index ? 'border-l-2 border-blue-500' : ''}`}
+                    ? 'bg-[#9DA4B259] text-gray-700'
+                    : 'bg-[#9DA4B226] text-gray-600'
+                } ${
+                  dragOverIndex === index && !isInfoTab(tab) 
+                    ? 'border-l-2 border-blue-500' 
+                    : ''
+                }`}
                 onClick={() => onTabClick(tab.id)}
                 onMouseEnter={() => tab.id !== activeTab && onTabHover(tab.id)}
                 onMouseLeave={onTabLeave}
-                draggable
-                onDragStart={(e) => onDragStart(e, tab.id)}
-                onDragOver={(e) => onDragOver(e, index)}
+                draggable={!isInfoTab(tab)} // Only draggable if not info tab
+                onDragStart={(e) => !isInfoTab(tab) && onDragStart(e, tab.id)}
+                onDragOver={(e) => !isInfoTab(tab) && onDragOver(e, index)}
                 onDragLeave={onDragLeave}
-                onDrop={(e) => onDrop(e, index)}
+                onDrop={(e) => !isInfoTab(tab) && onDrop(e, index)}
               >
-                {tab.icon}
+                {/* Icon - orange when active */}
+                <span className={tab.id === activeTab ? 'text-orange-500' : ''}>
+                  {tab.icon}
+                </span>
+                
                 {isRenaming === tab.id ? (
                   <input
                     type="text"
@@ -81,13 +91,16 @@ export const TabBar: React.FC<TabBarProps> = ({
                     autoFocus
                   />
                 ) : (
-                  <span className="text-sm font-medium whitespace-nowrap">{tab.name}</span>
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {tab.name}
+                  </span>
                 )}
                 
-                {tab.id === activeTab && (
+                {/* Show three dots menu button for all tabs except info tab */}
+                {tab.id === activeTab && !isInfoTab(tab) && (
                   <button
                     onClick={(e) => onMenuClick(tab.id, e)}
-                    className="p-1 hover:bg-orange-200 rounded transition-colors"
+                    className="p-0.5 hover:bg-gray-200 rounded transition-colors"
                   >
                     <MoreVertical size={12} />
                   </button>
