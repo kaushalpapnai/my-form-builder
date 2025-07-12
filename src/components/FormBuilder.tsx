@@ -1,28 +1,52 @@
 // components/FormBuilder.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Info, FileText, Plus, Check } from 'lucide-react';
-import { TabBar } from './TabBar';
-import { ContentArea } from './ContentArea';
-import { ContextMenu } from './ContextMenu';
-import type { Tab, Position } from '../types';
+import React, { useState, useRef, useEffect } from "react";
+import { Info, FileText, Check } from "lucide-react";
+import { TabBar } from "./TabBar";
+import { ContentArea } from "./ContentArea";
+import { ContextMenu } from "./ContextMenu";
+import type { Tab, Position } from "../types";
 
 export const FormBuilder: React.FC = () => {
   // State management
   const [tabs, setTabs] = useState<Tab[]>([
-    { id: '1', name: 'Info', icon: <Info size={16} />, content: 'Welcome to the Info page.', state: 'focused' },
-    { id: '2', name: 'Details', icon: <FileText size={16} />, content: 'Details content here.', state: 'default' },
-    { id: '3', name: 'Other', icon: <FileText size={16} />, content: 'Other content here.', state: 'default' },
-    { id: '4', name: 'Ending', icon: <Check size={16} />, content: 'Ending content here.', state: 'default' }
+    {
+      id: "1",
+      name: "Info",
+      icon: <Info size={16} />,
+      content: "Welcome to the Info page.",
+      state: "focused",
+    },
+    {
+      id: "2",
+      name: "Details",
+      icon: <FileText size={16} />,
+      content: "Details content here.",
+      state: "default",
+    },
+    {
+      id: "3",
+      name: "Other",
+      icon: <FileText size={16} />,
+      content: "Other content here.",
+      state: "default",
+    },
+    {
+      id: "4",
+      name: "Ending",
+      icon: <Check size={16} />,
+      content: "Ending content here.",
+      state: "default",
+    },
   ]);
 
-  const [activeTab, setActiveTab] = useState<string>('1');
+  const [activeTab, setActiveTab] = useState<string>("1");
   const [showMenu, setShowMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<Position>({ x: 0, y: 0 });
   const [draggedTab, setDraggedTab] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isRenaming, setIsRenaming] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState<string>('');
-  
+  const [renameValue, setRenameValue] = useState<string>("");
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -33,31 +57,42 @@ export const FormBuilder: React.FC = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Tab handlers
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    setTabs(prev => prev.map(tab => ({
-      ...tab,
-      state: tab.id === tabId ? 'focused' : 'default'
-    })));
+    setTabs((prev) =>
+      prev.map((tab) => ({
+        ...tab,
+        state: tab.id === tabId ? "focused" : "default",
+      }))
+    );
   };
 
   const handleTabHover = (tabId: string) => {
-    setTabs(prev => prev.map(tab => ({
-      ...tab,
-      state: tab.id === tabId ? 'hover' : tab.id === activeTab ? 'focused' : 'default'
-    })));
+    setTabs((prev) =>
+      prev.map((tab) => ({
+        ...tab,
+        state:
+          tab.id === tabId
+            ? "hover"
+            : tab.id === activeTab
+            ? "focused"
+            : "default",
+      }))
+    );
   };
 
   const handleTabLeave = () => {
-    setTabs(prev => prev.map(tab => ({
-      ...tab,
-      state: tab.id === activeTab ? 'focused' : 'default'
-    })));
+    setTabs((prev) =>
+      prev.map((tab) => ({
+        ...tab,
+        state: tab.id === activeTab ? "focused" : "default",
+      }))
+    );
   };
 
   const handleMenuClick = (tabId: string, event: React.MouseEvent) => {
@@ -69,22 +104,24 @@ export const FormBuilder: React.FC = () => {
 
   // Content handler
   const handleContentChange = (value: string) => {
-    setTabs(prev => prev.map(tab => 
-      tab.id === activeTab ? { ...tab, content: value } : tab
-    ));
+    setTabs((prev) =>
+      prev.map((tab) =>
+        tab.id === activeTab ? { ...tab, content: value } : tab
+      )
+    );
   };
 
   // Tab operations
   const addNewTab = (insertIndex?: number) => {
     const newTab: Tab = {
       id: Date.now().toString(),
-      name: 'New Page',
+      name: "New Page",
       icon: <FileText size={16} />,
-      content: 'Write your content here...',
-      state: 'default'
+      content: "Write your content here...",
+      state: "default",
     };
 
-    setTabs(prev => {
+    setTabs((prev) => {
       const newTabs = [...prev];
       if (insertIndex !== undefined) {
         newTabs.splice(insertIndex, 0, newTab);
@@ -97,11 +134,11 @@ export const FormBuilder: React.FC = () => {
 
   const deleteTab = (tabId: string) => {
     if (tabs.length <= 1) return;
-    
-    setTabs(prev => prev.filter(tab => tab.id !== tabId));
-    
+
+    setTabs((prev) => prev.filter((tab) => tab.id !== tabId));
+
     if (activeTab === tabId) {
-      const currentIndex = tabs.findIndex(tab => tab.id === tabId);
+      const currentIndex = tabs.findIndex((tab) => tab.id === tabId);
       const nextTab = tabs[currentIndex + 1] || tabs[currentIndex - 1];
       if (nextTab) {
         handleTabClick(nextTab.id);
@@ -111,18 +148,18 @@ export const FormBuilder: React.FC = () => {
   };
 
   const duplicateTab = (tabId: string) => {
-    const tabToDuplicate = tabs.find(tab => tab.id === tabId);
+    const tabToDuplicate = tabs.find((tab) => tab.id === tabId);
     if (!tabToDuplicate) return;
 
     const newTab: Tab = {
       ...tabToDuplicate,
       id: Date.now().toString(),
       name: `${tabToDuplicate.name} Copy`,
-      state: 'default'
+      state: "default",
     };
 
-    const currentIndex = tabs.findIndex(tab => tab.id === tabId);
-    setTabs(prev => {
+    const currentIndex = tabs.findIndex((tab) => tab.id === tabId);
+    setTabs((prev) => {
       const newTabs = [...prev];
       newTabs.splice(currentIndex + 1, 0, newTab);
       return newTabs;
@@ -131,7 +168,7 @@ export const FormBuilder: React.FC = () => {
   };
 
   const copyTab = (tabId: string) => {
-    const tabToCopy = tabs.find(tab => tab.id === tabId);
+    const tabToCopy = tabs.find((tab) => tab.id === tabId);
     if (!tabToCopy) return;
 
     navigator.clipboard.writeText(tabToCopy.content);
@@ -140,7 +177,7 @@ export const FormBuilder: React.FC = () => {
 
   // Rename operations
   const startRename = (tabId: string) => {
-    const tab = tabs.find(t => t.id === tabId);
+    const tab = tabs.find((t) => t.id === tabId);
     if (tab) {
       setIsRenaming(tabId);
       setRenameValue(tab.name);
@@ -149,28 +186,30 @@ export const FormBuilder: React.FC = () => {
   };
 
   const handleRename = (tabId: string) => {
-    setTabs(prev => prev.map(tab => 
-      tab.id === tabId ? { ...tab, name: renameValue } : tab
-    ));
+    setTabs((prev) =>
+      prev.map((tab) =>
+        tab.id === tabId ? { ...tab, name: renameValue } : tab
+      )
+    );
     setIsRenaming(null);
-    setRenameValue('');
+    setRenameValue("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, tabId: string) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleRename(tabId);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setIsRenaming(null);
-      setRenameValue('');
+      setRenameValue("");
     }
   };
 
   const setAsFirstPage = (tabId: string) => {
-    const tab = tabs.find(t => t.id === tabId);
+    const tab = tabs.find((t) => t.id === tabId);
     if (!tab) return;
 
-    setTabs(prev => {
-      const filteredTabs = prev.filter(t => t.id !== tabId);
+    setTabs((prev) => {
+      const filteredTabs = prev.filter((t) => t.id !== tabId);
       return [tab, ...filteredTabs];
     });
     setShowMenu(null);
@@ -179,7 +218,7 @@ export const FormBuilder: React.FC = () => {
   // Drag and drop handlers
   const handleDragStart = (e: React.DragEvent, tabId: string) => {
     setDraggedTab(tabId);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
@@ -193,15 +232,15 @@ export const FormBuilder: React.FC = () => {
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
+
     if (!draggedTab) return;
 
-    const draggedIndex = tabs.findIndex(tab => tab.id === draggedTab);
+    const draggedIndex = tabs.findIndex((tab) => tab.id === draggedTab);
     if (draggedIndex === -1) return;
 
     const newTabs = [...tabs];
     const draggedTabData = newTabs[draggedIndex];
-    
+
     newTabs.splice(draggedIndex, 1);
     newTabs.splice(dropIndex, 0, draggedTabData);
 
@@ -210,7 +249,7 @@ export const FormBuilder: React.FC = () => {
     setDragOverIndex(null);
   };
 
-  const currentTab = tabs.find(tab => tab.id === activeTab);
+  const currentTab = tabs.find((tab) => tab.id === activeTab);
 
   return (
     <div className="w-full h-screen bg-gray-50 flex flex-col">
@@ -234,15 +273,15 @@ export const FormBuilder: React.FC = () => {
         onKeyDown={handleKeyDown}
       />
 
-      <ContentArea 
-        currentTab={currentTab} 
-        onContentChange={handleContentChange} 
+      <ContentArea
+        currentTab={currentTab}
+        onContentChange={handleContentChange}
       />
 
       <ContextMenu
         showMenu={showMenu}
         menuPosition={menuPosition}
-        menuRef={menuRef}
+        menuRef={menuRef as React.RefObject<HTMLDivElement>} // Add this type assertion
         onSetAsFirstPage={() => showMenu && setAsFirstPage(showMenu)}
         onStartRename={() => showMenu && startRename(showMenu)}
         onCopyTab={() => showMenu && copyTab(showMenu)}
