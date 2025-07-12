@@ -1,9 +1,8 @@
-// components/TabBar.tsx
 import React from 'react';
-import { Plus, MoreVertical } from 'lucide-react';
+import { Plus, MoreVertical, Info as InfoIconLucide } from 'lucide-react';
 import type { Tab } from '../types';
 
-interface TabBarProps {
+export const TabBar: React.FC<{
   tabs: Tab[];
   activeTab: string;
   onTabClick: (tabId: string) => void;
@@ -21,9 +20,7 @@ interface TabBarProps {
   onRenameChange: (value: string) => void;
   onRenameSubmit: (tabId: string) => void;
   onKeyDown: (e: React.KeyboardEvent, tabId: string) => void;
-}
-
-export const TabBar: React.FC<TabBarProps> = ({
+}> = ({
   tabs,
   activeTab,
   onTabClick,
@@ -46,6 +43,50 @@ export const TabBar: React.FC<TabBarProps> = ({
 
   const isInfoTab = (tab: Tab) => tab.name.toLowerCase() === 'info';
 
+  const getIcon = (tab: Tab) => {
+    const activeClass = tab.id === activeTab ? 'text-orange-500' : 'text-gray-500';
+    
+    if (isInfoTab(tab)) {
+      return <InfoIconLucide size={18} className={activeClass} />;
+    }
+    if (tab.name.toLowerCase() === 'ending') {
+      return (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={activeClass}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+      );
+    }
+    return (
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={activeClass}
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <line x1="9" y1="13" x2="15" y2="13" />
+        <line x1="9" y1="17" x2="15" y2="17" />
+      </svg>
+    );
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center">
       {/* Scrollable tabs container */}
@@ -57,29 +98,27 @@ export const TabBar: React.FC<TabBarProps> = ({
               <div
                 className={`flex-shrink-0 relative flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                   tab.id === activeTab
-                    ? 'bg-white border border-gray-200 shadow-xs text-gray-800'
+                    ? 'bg-white border border-gray-200 shadow-sm text-gray-800'
                     : tab.state === 'hover'
                     ? 'bg-[#9DA4B259] text-gray-700'
                     : 'bg-[#9DA4B226] text-gray-600'
                 } ${
-                  dragOverIndex === index && !isInfoTab(tab) 
-                    ? 'border-l-2 border-blue-500' 
+                  dragOverIndex === index && !isInfoTab(tab)
+                    ? 'border-l-2 border-blue-500'
                     : ''
                 }`}
                 onClick={() => onTabClick(tab.id)}
                 onMouseEnter={() => tab.id !== activeTab && onTabHover(tab.id)}
                 onMouseLeave={onTabLeave}
-                draggable={!isInfoTab(tab)} // Only draggable if not info tab
+                draggable={!isInfoTab(tab)}
                 onDragStart={(e) => !isInfoTab(tab) && onDragStart(e, tab.id)}
                 onDragOver={(e) => !isInfoTab(tab) && onDragOver(e, index)}
                 onDragLeave={onDragLeave}
                 onDrop={(e) => !isInfoTab(tab) && onDrop(e, index)}
               >
-                {/* Icon - orange when active */}
-                <span className={tab.id === activeTab ? 'text-orange-500' : ''}>
-                  {tab.icon}
-                </span>
-                
+                {/* Icon */}
+                <span>{getIcon(tab)}</span>
+
                 {isRenaming === tab.id ? (
                   <input
                     type="text"
@@ -95,8 +134,7 @@ export const TabBar: React.FC<TabBarProps> = ({
                     {tab.name}
                   </span>
                 )}
-                
-                {/* Show three dots menu button for all tabs except info tab */}
+
                 {tab.id === activeTab && !isInfoTab(tab) && (
                   <button
                     onClick={(e) => onMenuClick(tab.id, e)}
@@ -107,22 +145,19 @@ export const TabBar: React.FC<TabBarProps> = ({
                 )}
               </div>
 
-              {/* Gap with dashed line - only show if not the last tab */}
+              {/* Gap with dotted line and plus button */}
               {index < tabs.length - 1 && (
                 <div
                   className="flex items-center justify-center relative px-2"
                   onMouseEnter={() => setHoveredGap(index + 1)}
                   onMouseLeave={() => setHoveredGap(null)}
                 >
-                  {/* Horizontal dashed line */}
-                  <div className="flex items-center gap-1">
-                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
-                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
-                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
-                    <div className="w-1 h-0.5 bg-gray-400 rounded-full"></div>
+                  <div className="flex items-center gap-[2px]">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="w-[2px] h-[2px] bg-gray-400 rounded-full" />
+                    ))}
                   </div>
-                  
-                  {/* Plus button - only visible on hover */}
+
                   <button
                     onClick={() => onAddTab(index + 1)}
                     className={`absolute w-5 h-5 flex items-center justify-center text-black shadow-md border border-gray-200 rounded-full transition-all bg-white ${

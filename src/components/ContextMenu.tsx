@@ -1,6 +1,9 @@
-// components/ContextMenu.tsx
 import React from 'react';
-import { Edit, Copy, Files, Trash2 } from 'lucide-react';
+import copyImg from "../img/copy.svg";
+import deleteImg from "../img/delete.svg";
+import duplicateImg from "../img/duplicate.svg";
+import flagImg from "../img/flag.svg";
+import pencilImg from "../img/pencil.svg";
 
 interface ContextMenuProps {
   showMenu: string | null;
@@ -28,56 +31,66 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   return (
     <div
       ref={menuRef}
-      className="fixed bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 min-w-48 mt-64"
+      className="fixed z-50 bg-white rounded-xl border border-gray-200 shadow-xl w-56 mt-72"
       style={{
         left: menuPosition.x,
         top: menuPosition.y,
         transform: 'translateY(-100%)'
       }}
     >
-      <button
-        onClick={onSetAsFirstPage}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-      >
-        <div className="w-4 h-4 flex items-center justify-center">
-          <div className="w-2 h-2 bg-blue-500 rounded-sm"></div>
-        </div>
-        Set as first page
-      </button>
-      
-      <button
-        onClick={onStartRename}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-      >
-        <Edit size={16} />
-        Rename
-      </button>
-      
-      <button
-        onClick={onCopyTab}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-      >
-        <Copy size={16} />
-        Copy
-      </button>
-      
-      <button
-        onClick={onDuplicateTab}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-      >
-        <Files size={16} />
-        Duplicate
-      </button>
-      
-      <hr className="my-2 border-gray-200" />
-      
-      <button
-        onClick={onDeleteTab}
-        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-      >
-        <Trash2 size={16} />
-        Delete
-      </button>
+      {/* Header */}
+      <div className="px-4 py-2 font-semibold text-gray-800 border-b border-gray-200">
+        Settings
+      </div>
+
+      {/* Actions */}
+      <div className="py-1">
+        <button
+          onClick={onSetAsFirstPage}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <img src={flagImg} alt="Flag" className="w-4 h-4" />
+          Set as first page
+        </button>
+
+        <button
+          onClick={onStartRename}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <img src={pencilImg} alt="Rename" className="w-4 h-4" />
+          Rename
+        </button>
+
+        <button
+          onClick={onCopyTab}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <img src={copyImg} alt="Copy" className="w-4 h-4" />
+          Copy
+        </button>
+
+        <button
+          onClick={onDuplicateTab}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          <img src={duplicateImg} alt="Duplicate" className="w-4 h-4" />
+          Duplicate
+        </button>
+      </div>
+
+      {/* Divider */}
+      <hr className="border-t border-gray-200 my-1" />
+
+      {/* Delete */}
+      <div className="pb-2">
+        <button
+          onClick={onDeleteTab}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <img src={deleteImg} alt="Delete" className="w-4 h-4" />
+          Delete
+        </button>
+      </div>
     </div>
   );
 };
